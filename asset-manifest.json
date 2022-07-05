@@ -1,12 +1,12 @@
 {
   "files": {
     "main.css": "/heardle-ita/static/css/main.8109eba7.css",
-    "main.js": "/heardle-ita/static/js/main.4bb30024.js",
+    "main.js": "/heardle-ita/static/js/main.d3865438.js",
     "static/media/SoundCloudLogo.svg": "/heardle-ita/static/media/SoundCloudLogo.e121ff0713069a8f3769c5596586f660.svg",
     "index.html": "/heardle-ita/index.html"
   },
   "entrypoints": [
     "static/css/main.8109eba7.css",
-    "static/js/main.4bb30024.js"
+    "static/js/main.d3865438.js"
   ]
 }
