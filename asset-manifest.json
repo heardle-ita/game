@@ -1,12 +1,12 @@
 {
   "files": {
     "main.css": "/static/css/main.3414e6a4.css",
-    "main.js": "/static/js/main.5143fee1.js",
+    "main.js": "/static/js/main.fbb2d377.js",
     "static/media/SoundCloudLogo.svg": "/static/media/SoundCloudLogo.e121ff0713069a8f3769c5596586f660.svg",
     "index.html": "/index.html"
   },
   "entrypoints": [
     "static/css/main.3414e6a4.css",
-    "static/js/main.5143fee1.js"
+    "static/js/main.fbb2d377.js"
   ]
 }
