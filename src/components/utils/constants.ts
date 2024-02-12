@@ -1,3 +1,5 @@
+import { SongConfig } from "../../types/interfaces/song";
+
 export const HEARDLE_IT_WEB_URL = "https://heardle.it";
 
 export const GAME_RESULT_MESSAGES = [
@@ -26,9 +28,17 @@ export const versions = [
     {name:"Amici", url: "", tag: "Coming Soon"}
 ]
 
+export const EMPTY_SONG_CONFIG: SongConfig = {
+    trackName: "",
+    breaks: [],
+    others: [],
+    songLength: 0
+  };
+
 export const banWords = [
     "rmx","unplugged", "reprise","remaster", "live", "remix", 
     "mix", "version", "edit", "remastered", "concert", "concerto", 
     "live", "studio", "registrazione", "dal vivo", "strumentale", 
     "session", "sanremo", "karaoke", "vrs", "performance"
 ];
+

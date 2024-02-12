@@ -1,6 +1,7 @@
 import { banWords } from "../components/utils/constants";
 import { artists } from "../components/utils/artists";
 import { SpotifyResult } from "../types/interfaces/spotify";
+import { SongOption } from "../types/interfaces/options";
 
 export const getAccessToken = (): Promise<any> => { 
 
@@ -35,89 +36,130 @@ export const getAccessToken = (): Promise<any> => {
 
 }
 
+async function fetchTracks(inputValue: string, offset: number, token: string) {
 
-export const getList = (token: string, inputValue: string, callback: (res: any[]) => void) => {
+  var myHeaders = new Headers();
+  myHeaders.append("Authorization", "Bearer " + token);
+  myHeaders.append("Content-Type", "application/json");
+
+  const urlTrack = `https://api.spotify.com/v1/search?q=${inputValue}&type=track&market=IT&location=it-IT&limit=40&offset=${offset * 40}`;
+
+  const response = await fetch(urlTrack, {
+    method: 'GET',
+    headers: myHeaders,
+    redirect: 'follow',
+  });
+
+  const data = await response.json();
+
+  console.log('fetchTracks', data.tracks)
+  return data.tracks ? data.tracks.items : undefined;
+}
+
+async function runSearch(inputValue: string, token: string) {
+  let allResults: any[] = [];
+
+  for (let i = 0; i < 5; i++) {
+    const items = await fetchTracks(inputValue, i, token);
+
+    if (items === undefined)
+      break
+
+    allResults = [...allResults, ...items];
+  }
+
+  const combinedResult = { items: allResults };
+
+  return combinedResult
+}
+
+
+export const getList = (token: string, inputValue: string) => {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
     myHeaders.append("Content-Type", "application/json");
 
-    fetch("https://api.spotify.com/v1/search?type=track&market=IT&limit=40&q=" + inputValue, {
-      method: 'GET',
-      headers: myHeaders,
-      redirect: 'follow'
-  })
-      .then(response => response.json())
+    let sortedTracks : SongOption[] = [];
+
+  if (inputValue != "") {
+    const requestTrack = runSearch(inputValue, token);
+
+    return requestTrack
       .then(response => {
-          console.warn("Searching...")
-          let mapTracks = new Map<string,string>()
-          let tracks: any[] = []
 
-          if (response && response.tracks.items ) {
-            response.tracks.items
-                .filter((track: any) => {
-                    return (track && track.artists[0].name.indexOf("unknown") === -1 && track.name.indexOf("unknown") === -1)
-                })
-                .map((track: SpotifyResult) => {
-                  
-                  var value = new RegExp(banWords.join('|')).test(track.name.toLowerCase());
-                  if(artists.includes(track.artists[0].name.toLowerCase()) && !value) {
-                    let id = track.artists[0].name + track.name;
-                    id = id.replaceAll(" ","");
-                    // let id = track.duration_ms.toString() + track.artists[0].name.substring(0,3);
-                    // let value = track.artists[0].name + " " + track.name;
-                  
-                    let label = track.artists[0].name + " - " + track.name;
-                    label = label.replaceAll("å", "a");
-                    label = label.replaceAll("_", "");
-                    label = label.replaceAll(".", "");
-                    label = label.replaceAll("?", "");
-                    label = label.replaceAll("!", "");
-                    mapTracks.set(id,label);
-                  }
-                });
+        console.warn("Searching...")
+        let mapTracks = new Map<string, string>()
+        let tracks: SongOption[] = []
+
+        if (response && response.items) {
+
+          if (response.items.length === 0) {
+            
+            return tracks
+          }
+
+          response.items
+            .filter((track: any) => (track && track.artists[0].name.indexOf("unknown") === -1 && track.name.indexOf("unknown") === -1))
+            .map((track: SpotifyResult) => {
+
+              var value = new RegExp(banWords.join('|')).test(track.name.toLowerCase());
+
+              if (artists.includes(track.artists[0].name.toLowerCase()) && !value) {
+                let id = track.artists[0].name + track.name;
+                id = id.replaceAll(" ", "");
+                // let id = track.duration_ms.toString() + track.artists[0].name.substring(0,3);
+                // let value = track.artists[0].name + " " + track.name;
+
+                let label = track.artists[0].name + " - " + track.name;
+                label = label.replaceAll("å", "a");
+                label = label.replaceAll("_", "");
+                label = label.replaceAll(".", "");
+                label = label.replaceAll("?", "");
+                label = label.replaceAll("!", "");
+                mapTracks.set(id, label);
+              }
+            });
         }
 
-        /** PARTE IN CUI SI RIORDINA LA LISTA TRACKS
-         * E AGGIORNATA ATTRAVERSO L' inputValue
-         */
-        // console.log(mapTracks);
-        if(tracks.length == 0)
-        { 
-            mapTracks.forEach((value) =>{
-            let i=0;
-            tracks.push({label:value, value:value.replaceAll(" -","")})
-          })
-        }
-        
-        let sortedTracks = [...tracks].sort((a,b) => a.label.localeCompare(b.label));
+        mapTracks.forEach((value) => {
+          tracks.push({ label: value, value: value.replaceAll(" -", "") })
+        })
+
+        let sortedTracks = [...tracks].sort((a, b) => a.label.localeCompare(b.label));
 
         [...sortedTracks].forEach(value => {
           // restituisce un solo valore nella lista
-          if(value.value.toLowerCase()===inputValue.toLowerCase()) {
-              var index = sortedTracks.indexOf(value); 
-              sortedTracks.forEach(value => {
-                  if(sortedTracks[index]!=value)
-                    delete sortedTracks[sortedTracks.indexOf(value)]
-              })
-              callback(sortedTracks)   
+          if (value.value.toLowerCase() === inputValue.toLowerCase()) {
+            var index = sortedTracks.indexOf(value);
+            sortedTracks.forEach(value => {
+              if (sortedTracks[index] != value)
+                delete sortedTracks[sortedTracks.indexOf(value)]
+            })
+
           }
           // restituisce nella lista i valori che includono inputValue
-          else if(value.value.toLowerCase().includes(inputValue.toLowerCase())) {
-            sortedTracks.forEach(value =>{
-                  if(!value.value.toLowerCase().includes(inputValue.toLowerCase())) {
-                      delete sortedTracks[sortedTracks.indexOf(value)]
-                  }
-              })
-              callback(sortedTracks)
-          }
-          return
-      })
+          if (value.value.toLowerCase().includes(inputValue.toLowerCase())) {
+            sortedTracks.forEach(value => {
+              if (!value.value.toLowerCase().includes(inputValue.toLowerCase())) {
+                delete sortedTracks[sortedTracks.indexOf(value)]
+              }
+            })
 
+          }
+
+          return sortedTracks
+        })
+
+        
         return sortedTracks;
-    })
-    .catch((err) => {
-        console.error(err)
-    });
+      })
+      .catch((err) => {
+        console.error(err);
+        return sortedTracks;
+      });
+  }
+
+  return Promise.resolve(sortedTracks);
 }
 
      

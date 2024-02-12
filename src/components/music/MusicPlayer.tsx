@@ -4,6 +4,7 @@ import PlayerProgress from "./PlayerProgress";
 import MusicPlayerControls from "./MusicPlayerControls";
 import { useGameData } from "../player/GameContext";
 import ReactPlayer from 'react-player';
+import { SongConfig } from "../../types/interfaces/song";
 
 const DEFAULT_START_MILIS = 15;
 
@@ -22,7 +23,7 @@ function calculateSlicePercentages(songLength: number, breaks: number[]) {
 }
 
 type MusicPlayerProps = {
-    songConfig: any
+    songConfig: SongConfig
 }
 
 

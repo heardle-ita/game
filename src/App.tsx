@@ -8,6 +8,7 @@ import { getDailySong } from "./services/dataService";
 import { getAccessToken } from "./services/spotifyService";
 import { SongConfig } from "./types/interfaces/song";
 import LoadingSpinner from "./components/LoadingSpinner";
+import { EMPTY_SONG_CONFIG } from "./components/utils/constants";
 
 
 const APP_VERSION = process.env.REACT_APP_VERSION || "0";
@@ -18,12 +19,6 @@ if (currentVersion !== APP_VERSION) {
   console.log(`version upgrated from ${currentVersion} to ${APP_VERSION}`);
   localStorage.setItem("version", APP_VERSION);
 }
-
-const EMPTY_SONG_CONFIG: SongConfig = {
-  trackName: "",
-  breaks: [],
-  others: [],
-};
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -56,7 +51,7 @@ function App() {
 
           console.debug(" - Server: " + day);
 
-          getDailySong(accessKey, day).then((songConfig) => {
+          getDailySong(accessKey, day).then((songConfig: SongConfig) => {
             setCurrentSongConfig(songConfig);
             setLoading(false);
           });

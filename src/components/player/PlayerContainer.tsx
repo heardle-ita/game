@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AsyncSelect from "react-select/async";
 import GamePlayground from "./GamePlayground";
 import GameResult from "./GameResult";
@@ -10,6 +10,14 @@ import { SongConfig } from "../../types/interfaces/song";
 import { getList } from "../../services/spotifyService";
 import { getUserByUid, updateUserByUid } from "../../services/firebaseRealtime";
 import { buildScore } from "../../services/function";
+import { SongOption } from "../../types/interfaces/options";
+import { Subject, debounceTime, distinctUntilChanged } from "rxjs";
+
+interface prova {
+  input: string,
+  callback: (res: SongOption[]) => void
+}
+
 
 function PlayerContainer({
   songConfig,
@@ -23,10 +31,19 @@ function PlayerContainer({
   const [answer, setAnswer] = useState("");
   const [selectedSong, setSelectedSong] = useState("");
 
+  let inputSubject = new Subject<prova>()
+
   const {
     dispatch,
     state: { openedStep, finished, guessList },
   } = useGameData();
+
+  useEffect(() => {
+    inputSubject.pipe(
+      debounceTime(750),
+      distinctUntilChanged()
+    ).subscribe((v) => getList(accessToken, v.input).then((el: SongOption[]) => v.callback(el)))
+  })
 
   const onSkipClicked = () => {
     dispatch({ type: "SKIP", payload: { step: openedStep } });
@@ -63,12 +80,7 @@ function PlayerContainer({
   };
 
   const loadList = (inputValue: string, callback: (res: any[]) => void) => {
-    if (!inputValue || inputValue.trim().length < 1) {
-      callback([]);
-      return;
-    }
-
-    getList(accessToken, inputValue, callback);
+    inputSubject.next({input: inputValue, callback: callback})
   };
 
   const handleInputChange = (newValue: OnChangeValue<any, any>) => {
@@ -161,6 +173,7 @@ function PlayerContainer({
                       DropdownIndicator: () => null,
                       IndicatorSeparator: () => null,
                     }}
+                    loadingMessage={() => 'Ricerca in corso...'}
                     noOptionsMessage={({ inputValue }) =>
                       !inputValue.trim()
                         ? "Inserisci almeno 1 carattere per cercare"
@@ -170,14 +183,7 @@ function PlayerContainer({
                     loadOptions={loadList}
                     value={selectedSong}
                     blurInputOnSelect={true}
-                    //input={{ 'aria-labelledby': 'react-select-2-placeholder' }}
                     menuPortalTarget={document.body}
-                    /* styles={{
-                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                      placeholder: (base) => ({ ...base, color: "#4F4F4F" }),
-                      noOptionsMessage: (base) => ({ ...base, color: "red" }),
-                      loadingMessage: (base) => ({ ...base, color: "black" }),
-                    }} */
                     styles={customStyles}
                     onChange={handleInputChange}
                     maxMenuHeight={200}
