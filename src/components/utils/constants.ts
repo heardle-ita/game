@@ -22,10 +22,10 @@ export const icon = ["🥇","🥈","🥉"]
 export const errorString = "Oops... qualcosa è andato storto! Controlla le tue impostazioni di connessione e riprova!";
 
 export const versions = [
-    {name:"Indie", url: "http://indie.heardle.it/", tag: ""},  
-    {name:"90s", url: "", tag: "Coming Soon"},
-    {name:"X Factor", url: "", tag: "Coming Soon"},
-    {name:"Amici", url: "", tag: "Coming Soon"}
+    {name:"Indie", url: "http://indie.heardle.it/"},  
+    {name:"90s", url: "", tag: "Coming Soon", class:"coming-soon"},
+    {name:"Amici", url: "", tag: "Coming Soon", class:"coming-soon"},
+    {name:"X Factor", url: "", tag: "Coming Soon", class:"coming-soon"}
 ]
 
 export const EMPTY_SONG_CONFIG: SongConfig = {

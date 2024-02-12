@@ -215,3 +215,15 @@ body {
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
+
+.versions { 
+  background-color: #363062
+}
+
+.versions > span#new{
+  background-color: #0F9D58;
+}
+
+.versions > span#coming-soon{
+  background-color: #DB4437;
+}
