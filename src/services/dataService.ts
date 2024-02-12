@@ -4,6 +4,7 @@ import { artists } from "../components/utils/artists";
 import { getDatabase, ref, onValue, set } from "firebase/database";
 import { db } from "./firebase";
 import { banWords } from "../components/utils/constants";
+import { of } from "rxjs";
 
 interface Map {
   [key: string]: any;
@@ -32,26 +33,56 @@ const setSong = (day: string, selectedSong: any) => {
   set(ref(db, "songs/" + day), hardCodedSong);
 };
 
-async function fetchSong(accessToken: string, artist: string): Promise<any> {
+async function fetchSong(accessToken: string): Promise<any> {
+
+  var finded: boolean = false;
+  let song;
+  let offset = 0;
+
+  let artist = artists[Math.floor(Math.random() * artists.length)];
   var myHeaders = new Headers();
   myHeaders.append("Authorization", "Bearer " + accessToken);
   myHeaders.append("Content-Type", "application/json");
 
-  return await fetch(
-    "https://api.spotify.com/v1/search?type=track&market=IT&q=" + artist,
+  do {
+
+  console.log(artist)
+
+  song = await fetch(
+    `https://api.spotify.com/v1/search?q=artist:${artist}&type=track&market=IT&limit=40&offset=${offset * 40}`,
     {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
     }
   )
-    .then((response) => response.json())
-    .then(
-      (response) =>
-        response.tracks.items[
-          Math.floor(Math.random() * response.tracks.items.length)
+  .then((response) => response.json())
+  .then(
+    (response) => {
+      let artistsSongs = response.tracks.items.filter((v: any) => (v.artists[0].name.toLowerCase() === artist) && (v.preview_url != null))
+      console.log(artistsSongs)
+      if(artistsSongs.length != 0) {
+        return artistsSongs[
+          Math.floor(Math.random() * artistsSongs.length)
         ]
-    );
+      }
+    }
+  )
+  .catch((error) => {
+    // reset search
+    artist = artists[Math.floor(Math.random() * artists.length)]
+    offset = 0
+    return undefined
+  });
+
+  if(song && !(new RegExp(banWords.join("|")).test(song.name.toLowerCase()))) 
+    finded = true;
+  
+  offset++;
+  
+  } while(!finded)
+
+  return song;
 }
 
 export const getDailySong = (
@@ -61,7 +92,6 @@ export const getDailySong = (
 
   let day = dayPath.replaceAll("/", "");
 
-  let artist = artists[Math.floor(Math.random() * artists.length)];
   let hardCodedSong: any;
 
   if (SONG_DATABASE[day]) {
@@ -73,28 +103,21 @@ export const getDailySong = (
     //const database = getDatabase();
 
     let selectedSong: any;
-    var value: boolean = true;
 
-    do {
-      do {
-        selectedSong = await fetchSong(accessToken, artist).then((song) => {
+    //do {
+      //do {
+        //selectedSong = await fetchSong(accessToken)
+        /* .then((song) => {
           value = new RegExp(banWords.join("|")).test(song.name.toLowerCase());
           value ? console.debug("rejected: " + value) : null;
           return song;
         });
-      } while(value);
-      console.debug("Preview url: " + (selectedSong.preview_url != null));
-      console.debug(
-        "Compared: " +
-          (selectedSong.artists[0].name.toLowerCase() + " != " + artist) +
-          " " +
-          (selectedSong.artists[0].name.toLowerCase() != artist)
-      );
-      console.debug("filtered: " + value);
-    } while (
-      selectedSong.preview_url != null &&
+      } while(value); */
+
+    /* } while (
       selectedSong.artists[0].name.toLowerCase() != artist
-    );
+    ); */
+    selectedSong = await fetchSong(accessToken)
 
     let song = selectedSong.name.includes("-")
       ? selectedSong.name.substring(0, selectedSong.name.indexOf("-"))

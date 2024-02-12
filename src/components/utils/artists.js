@@ -190,7 +190,7 @@ export const artists = [
     "niveo",
     "ndg",
     "luigi strangis",
-    "alex w",
+    "alex wyse",
     "francesca michielin",
     "colapesce",
     "baby k",
