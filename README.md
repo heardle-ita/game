@@ -1,3 +1,3 @@
 # Heardle ITA
 
-Versione Italiana di [Heardle](heardle.app).
+Versione Italiana di Heardle.
