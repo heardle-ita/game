@@ -1,6 +1,6 @@
 import { useModalData } from "./ModalContext";
 import { useState } from "react";
-import { setUser } from "../utils/firebaseRealtime";
+import { setUser } from "../../services/firebaseRealtime";
 import { cuss as cussIt } from "cuss/it";
 import { cuss as cussEng } from "cuss";
 

@@ -1,15 +1,6 @@
-import { banWords } from "../game/Constants";
-import { artists } from "../utils/artists";
-
-type artist = {
-  name: string
-}
-
-type SpotifyResult = {
-  duration_ms: number
-  artists: artist[]
-  name: string
-}
+import { banWords } from "../components/utils/constants";
+import { artists } from "../components/utils/artists";
+import { SpotifyResult } from "../types/interfaces/spotify";
 
 export const getAccessToken = (): Promise<any> => { 
 

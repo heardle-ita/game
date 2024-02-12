@@ -1,12 +1,12 @@
 import Header from "./components/Header";
 import PlayerContainer from "./components/player/PlayerContainer";
-import AllModals from "./components/modals/AllModals";
-import { ModalContextProvider } from "./components/modals/ModalContext";
+import AllModals from "./components/header/AllModals";
+import { ModalContextProvider } from "./components/header/ModalContext";
 import { GameContextProvider } from "./components/player/GameContext";
 import { useEffect, useState } from "react";
-import { getDailySong } from "./components/utils/dataService";
-import { getAccessToken } from "./components/utils/spotifyService";
-import { SongConfig } from "./components/game/SongConfig";
+import { getDailySong } from "./services/dataService";
+import { getAccessToken } from "./services/spotifyService";
+import { SongConfig } from "./types/interfaces/song";
 import LoadingSpinner from "./components/LoadingSpinner";
 
 

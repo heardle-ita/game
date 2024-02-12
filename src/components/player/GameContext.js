@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { getDayStr } from '../utils';
+import { getDayStr } from '../../services/function';
 
 const GameContext = React.createContext();
 

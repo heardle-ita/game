@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { getUserByUid } from '../utils/firebaseRealtime';
+import { getUserByUid } from '../../services/firebaseRealtime';
 
 const ModalContext = React.createContext();
 

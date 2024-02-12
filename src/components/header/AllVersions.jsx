@@ -1,4 +1,4 @@
-import { versions } from "../game/Constants";
+import { versions } from "../utils/constants";
 
 
 function AllVersions() {

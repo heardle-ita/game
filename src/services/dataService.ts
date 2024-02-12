@@ -1,9 +1,9 @@
-import { getDayStr, getDayStrAsPath } from ".";
-import { SongConfig } from "../game/SongConfig";
-import { artists } from "../utils/artists";
+import { getDayStr, getDayStrAsPath } from "./function";
+import { SongConfig } from "../types/interfaces/song";
+import { artists } from "../components/utils/artists";
 import { getDatabase, ref, onValue, set } from "firebase/database";
 import { db } from "./firebase";
-import { banWords } from "../game/Constants";
+import { banWords } from "../components/utils/constants";
 
 interface Map {
   [key: string]: any;

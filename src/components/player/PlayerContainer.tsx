@@ -4,12 +4,12 @@ import GamePlayground from "./GamePlayground";
 import GameResult from "./GameResult";
 import { useGameData } from "./GameContext";
 import MusicPlayer from "../music/MusicPlayer";
-import { checkAnswer } from "../game/Utils";
+import { checkAnswer } from "../../services/function";
 import { OnChangeValue } from "react-select";
-import { SongConfig } from "../game/SongConfig";
-import { getList } from "../utils/spotifyService";
-import { getUserByUid, updateUserByUid } from "../utils/firebaseRealtime";
-import { buildScore } from "../utils";
+import { SongConfig } from "../../types/interfaces/song";
+import { getList } from "../../services/spotifyService";
+import { getUserByUid, updateUserByUid } from "../../services/firebaseRealtime";
+import { buildScore } from "../../services/function";
 
 function PlayerContainer({
   songConfig,

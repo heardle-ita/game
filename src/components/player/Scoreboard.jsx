@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { getDB } from "../utils/firebaseRealtime";
+import { getDB } from "../../services/firebaseRealtime";
 import LoadingSpinner from '../LoadingSpinner';
-import {icon} from "../game/Constants";
-import { buildScore } from "../utils";
+import {icon} from "../utils/constants";
+import { buildScore } from "../../services/function";
 import { onValue, ref } from "@firebase/database";
 import { useGameData } from "./GameContext";
 

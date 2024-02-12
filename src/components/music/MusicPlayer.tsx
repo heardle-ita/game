@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { SILENT_SONG } from '../game/Constants';
+import { SILENT_SONG } from '../utils/constants';
 import PlayerProgress from "./PlayerProgress";
 import MusicPlayerControls from "./MusicPlayerControls";
 import { useGameData } from "../player/GameContext";
@@ -63,12 +63,9 @@ function MusicPlayer({ songConfig }: MusicPlayerProps) {
     useEffect(() => {
         let iframeElement = document.getElementById('soundcloud-iframe');
 
-
         SC_WIDGET = window.SC.Widget(iframeElement);
 
-        SC_WIDGET.unbind(window.SC.Widget.Events.PLAY_PROGRESS);
         SC_WIDGET.unbind(window.SC.Widget.Events.READY);
-        SC_WIDGET.unbind(window.SC.Widget.Events.FINISH);
 
         SC_WIDGET.bind(window.SC.Widget.Events.FINISH, () => {
             setPlaying(false);

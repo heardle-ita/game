@@ -1,4 +1,4 @@
-import { useModalData } from "./modals/ModalContext";
+import { useModalData } from "./header/ModalContext";
 import { useState, useEffect } from "react";
 
 function Header() {

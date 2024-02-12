@@ -2,8 +2,8 @@ import { useGameData } from "./GameContext";
 import copy from 'copy-to-clipboard';
 import NextTimer from "./NextTimer";
 import { useState, useEffect } from "react";
-import { GAME_RESULT_FAILED_MESSAGE, GAME_RESULT_MESSAGES, HEARDLE_IT_WEB_URL } from "../game/Constants";
-import { buildScore, getDayFormattedText } from "../utils";
+import { GAME_RESULT_FAILED_MESSAGE, GAME_RESULT_MESSAGES, HEARDLE_IT_WEB_URL } from "../utils/constants";
+import { buildScore, getDayFormattedText } from "../../services/function";
 import Table from "./Scoreboard";
 import Banner from "../Banner";
 
