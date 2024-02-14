@@ -6,14 +6,14 @@ admin.initializeApp({
   databaseURL: "https://heardleita-default-rtdb.europe-west1.firebasedatabase.app"
 });
 
-const TIME_TO_DELETE = 604800000;
+const TIME_TO_DELETE = 604800000; // 7 days
 
 // As an admin, the app has access to read and write all data, regardless of Security Rules
 const db = admin.database();
 const usersRef = db.ref("users");
 
 // Function to remove all users
-const removeAllUsers = async () => {
+const removeOrResetUsers = async () => {
   try {
     const snapshot = await usersRef.once('value');
 
@@ -21,9 +21,10 @@ const removeAllUsers = async () => {
     if (snapshot.exists()) {
       // Array to store promises for update operations
       const updatePromises = [];
+      const actualTime = new Date().getTime();
 
       snapshot.forEach((userSnapshot) => {
-        if (!userSnapshot.val().timestamp || new Date().getTime() - userSnapshot.val().timestamp >= TIME_TO_DELETE) {
+        if (!userSnapshot.val().timestamp || actualTime - userSnapshot.val().timestamp >= TIME_TO_DELETE) {
           // Use remove method to delete the node
           updatePromises.push(usersRef.child(userSnapshot.key).remove());
         } else {
@@ -48,5 +49,5 @@ const removeAllUsers = async () => {
 };
 
 // Call the function to remove all users
-removeAllUsers();
+removeOrResetUsers();
 
