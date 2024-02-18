@@ -46,39 +46,39 @@ async function fetchSong(accessToken: string): Promise<any> {
 
   do {
 
-  console.log(artist)
+    console.log(artist)
 
-  song = await fetch(
-    `https://api.spotify.com/v1/search?q=artist:${artist}&type=track&market=IT&limit=40&offset=${offset * 40}`,
-    {
-      method: "GET",
-      headers: myHeaders,
-      redirect: "follow",
-    }
-  )
-  .then((response) => response.json())
-  .then(
-    (response) => {
-      let artistsSongs = response.tracks.items.filter((v: any) => (v.artists[0].name.toLowerCase() === artist) && (v.preview_url != null))
-      console.log(artistsSongs)
-      if(artistsSongs.length != 0) {
-        return artistsSongs[
-          Math.floor(Math.random() * artistsSongs.length)
-        ]
+    song = await fetch(
+      `https://api.spotify.com/v1/search?q=artist:${artist}&type=track&market=IT&limit=40&offset=${offset * 40}`,
+      {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow",
       }
-    }
-  )
-  .catch((error) => {
-    // reset search
-    artist = artists[Math.floor(Math.random() * artists.length)]
-    offset = 0
-    return undefined
-  });
+    )
+    .then((response) => response.json())
+    .then(
+      (response) => {
+        let artistsSongs = response.tracks.items.filter((v: any) => (v.artists[0].name.toLowerCase() === artist) && (v.preview_url != null))
+        console.log(artistsSongs)
+        if(artistsSongs.length != 0) {
+          return artistsSongs[
+            Math.floor(Math.random() * artistsSongs.length)
+          ]
+        }
+      }
+    )
+    .catch((error) => {
+      // reset search
+      artist = artists[Math.floor(Math.random() * artists.length)]
+      offset = 0
+      return undefined
+    });
 
-  if(song && !(new RegExp(banWords.join("|")).test(song.name.toLowerCase()))) 
-    finded = true;
-  
-  offset++;
+    if(song && !(new RegExp(banWords.join("|")).test(song.name.toLowerCase()))) 
+      finded = true;
+    
+    offset++;
   
   } while(!finded)
 

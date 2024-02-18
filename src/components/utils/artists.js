@@ -220,7 +220,6 @@ export const artists = [
     "il volo",
     "gazzelle",
     "bnkr44",
-    "negra",
     "ricchi e poveri",
     "renga nek",
     "mida",
