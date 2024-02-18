@@ -148,7 +148,6 @@ export const artists = [
     "marco carta",
     "valerio scanu",
     "anna oxa",
-    "maria scicolone",
     "emma",
     "arisa",
     "pinguini tattici nucleari",

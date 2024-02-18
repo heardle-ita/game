@@ -4,19 +4,15 @@ import GamePlayground from "./GamePlayground";
 import GameResult from "./GameResult";
 import { useGameData } from "./GameContext";
 import MusicPlayer from "../music/MusicPlayer";
-import { checkAnswer } from "../../services/function";
-import { OnChangeValue } from "react-select";
+import { checkAnswer, merge } from "../../services/function";
+import { ActionMeta, InputAction, InputActionMeta, OnChangeValue, SingleValue } from "react-select";
 import { SongConfig } from "../../types/interfaces/song";
 import { getList } from "../../services/spotifyService";
 import { getUserByUid, updateUserByUid } from "../../services/firebaseRealtime";
 import { buildScore } from "../../services/function";
 import { SongOption } from "../../types/interfaces/options";
-import { Subject, debounceTime, distinctUntilChanged } from "rxjs";
-
-interface prova {
-  input: string,
-  callback: (res: SongOption[]) => void
-}
+import { Subject, debounceTime, distinctUntilChanged, filter, map, tap } from "rxjs";
+import Select from "react-select";
 
 
 function PlayerContainer({
@@ -28,21 +24,34 @@ function PlayerContainer({
   accessToken: string;
   date: string;
 }) {
-  const [answer, setAnswer] = useState("");
-  const [selectedSong, setSelectedSong] = useState("");
 
-  let inputSubject = new Subject<prova>()
+  const [answer, setAnswer] = useState("");
+  const [selectedOption, setSelectedOption] = useState<SongOption[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  let inputSubject = new Subject<string>()
 
   const {
     dispatch,
     state: { openedStep, finished, guessList },
   } = useGameData();
 
+
   useEffect(() => {
     inputSubject.pipe(
       debounceTime(750),
+      filter((v: string) => v.length > 1),
+      tap(() => setLoading(true)),
       distinctUntilChanged()
-    ).subscribe((v) => getList(accessToken, v.input).then((el: SongOption[]) => v.callback(el)))
+    ).subscribe(async (v: string) => {
+      let result: SongOption[] = await getList(accessToken, v);
+
+      if(selectedOption.length != 0) 
+        result = merge(selectedOption, result)
+      
+      setSelectedOption(result)
+      setLoading(false);
+    })
   })
 
   const onSkipClicked = () => {
@@ -71,7 +80,6 @@ function PlayerContainer({
     }
 
     setAnswer("");
-    setSelectedSong("");
   };
 
   const onFinishClicked = () => {
@@ -79,13 +87,12 @@ function PlayerContainer({
     updateScore();
   };
 
-  const loadList = (inputValue: string, callback: (res: any[]) => void) => {
-    inputSubject.next({input: inputValue, callback: callback})
-  };
+  const loadOption = (inputValue: string) => {
+    inputSubject.next(inputValue.trim())
+  }
 
-  const handleInputChange = (newValue: OnChangeValue<any, any>) => {
+  const handleChange = (newValue: SingleValue<SongOption>, actionMeta: ActionMeta<SongOption>) => {
     if (newValue) {
-      setSelectedSong(newValue);
       console.debug("value:", newValue.value);
       setAnswer(newValue.value);
     }
@@ -155,6 +162,13 @@ function PlayerContainer({
       })
   };
 
+  const options = [
+    { value: "blues", label: "Blues" },
+    { value: "rock", label: "Rock" },
+    { value: "jazz", label: "Jazz" },
+    { value: "orchestra", label: "Orchestra" },
+  ];
+
   return (
     <>
       {finished ? <GameResult songConfig={songConfig} date={date} /> : <GamePlayground />}
@@ -165,28 +179,24 @@ function PlayerContainer({
             <div>
               <div className="">
                 <div className="autoComplete_wrapper" role="form">
-                  <AsyncSelect
-                    defaultOptions
-                    menuPlacement="top"
-                    cacheOptions
+                  <Select
+                    menuPlacement="top"  
                     components={{
                       DropdownIndicator: () => null,
                       IndicatorSeparator: () => null,
                     }}
+                    isLoading={loading}
                     loadingMessage={() => 'Ricerca in corso...'}
-                    noOptionsMessage={({ inputValue }) =>
-                      !inputValue.trim()
-                        ? "Inserisci almeno 1 carattere per cercare"
-                        : "Nessuna Corrispondenza"
-                    }
-                    placeholder={"La conosci? Cerca per artista / titolo"}
-                    loadOptions={loadList}
-                    value={selectedSong}
+                    noOptionsMessage={() => 'Nessuna Corrispondenza'}
+                    placeholder={"La conosci? Cerca per artista o titolo o entrambi"}
+                    options={selectedOption}
                     blurInputOnSelect={true}
                     menuPortalTarget={document.body}
                     styles={customStyles}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
+                    onInputChange={loadOption}
                     maxMenuHeight={200}
+                    isClearable
                   />
                 </div>
               </div>

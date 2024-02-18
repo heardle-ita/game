@@ -2,6 +2,7 @@ import { banWords } from "../components/utils/constants";
 import { artists } from "../components/utils/artists";
 import { SpotifyResult } from "../types/interfaces/spotify";
 import { SongOption } from "../types/interfaces/options";
+import { mapTo } from "rxjs";
 
 export const getAccessToken = (): Promise<any> => { 
 
@@ -93,11 +94,9 @@ export const getList = (token: string, inputValue: string) => {
 
         if (response && response.items) {
 
-          if (response.items.length === 0) {
-            
+          if (response.items.length === 0) 
             return tracks
-          }
-
+          
           response.items
             .filter((track: any) => (track && track.artists[0].name.indexOf("unknown") === -1 && track.name.indexOf("unknown") === -1))
             .map((track: SpotifyResult) => {
@@ -125,9 +124,13 @@ export const getList = (token: string, inputValue: string) => {
           tracks.push({ label: value, value: value.replaceAll(" -", "") })
         })
 
+        //console.log(mapTracks);
+
         let sortedTracks = [...tracks].sort((a, b) => a.label.localeCompare(b.label));
 
-        [...sortedTracks].forEach(value => {
+        //console.log(sortedTracks);
+
+        /* [...sortedTracks].forEach(value => {
           // restituisce un solo valore nella lista
           if (value.value.toLowerCase() === inputValue.toLowerCase()) {
             var index = sortedTracks.indexOf(value);
@@ -139,6 +142,7 @@ export const getList = (token: string, inputValue: string) => {
           }
           // restituisce nella lista i valori che includono inputValue
           if (value.value.toLowerCase().includes(inputValue.toLowerCase())) {
+            console.log(inputValue, value)
             sortedTracks.forEach(value => {
               if (!value.value.toLowerCase().includes(inputValue.toLowerCase())) {
                 delete sortedTracks[sortedTracks.indexOf(value)]
@@ -148,7 +152,7 @@ export const getList = (token: string, inputValue: string) => {
           }
 
           return sortedTracks
-        })
+        }) */
 
         
         return sortedTracks;

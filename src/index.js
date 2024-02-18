@@ -4,8 +4,11 @@ import './index.css';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
-if (process.env.NODE_ENV === 'production') {
-  console.debug = () => { }
+if (process.env.NODE_ENV !== 'development') {
+  console.log = () => {};
+  console.debug = () => {};
+  console.info = () => {};
+  console.warn = () => {};
 }
 
 ReactDOM.render(

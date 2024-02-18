@@ -1,6 +1,14 @@
 
 import { STRING_COMPARE_LOCALE } from '../components/utils/constants';
+import { SongOption } from '../types/interfaces/options';
 import { SongConfig } from '../types/interfaces/song';
+
+const merge = (a: SongOption[], b: SongOption[], predicate = (a: SongOption, b: SongOption) => a.value === b.value) => {
+    const c = [...a]; // copy to avoid side effects
+    // add all items from B to copy C if they're not already present
+    b.forEach((bItem) => (c.some((cItem) => predicate(cItem, bItem)) ? null : c.push(bItem)))
+    return c;
+}
 
 const checkStrings = (expected: string, userAnswer: string) => {
     const similarityScore = similarity(expected, userAnswer);
@@ -151,4 +159,4 @@ const buildScore = (guessList: any[]): number => {
     return max;
 }
 
-export { checkAnswer, getDayStr, getDayStrAsPath, getDayFormattedText, similarity, buildScore }
+export { merge, checkAnswer, getDayStr, getDayStrAsPath, getDayFormattedText, similarity, buildScore }
