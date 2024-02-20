@@ -188,7 +188,7 @@ function PlayerContainer({
                     isLoading={loading}
                     loadingMessage={() => 'Ricerca in corso...'}
                     noOptionsMessage={() => 'Nessuna Corrispondenza'}
-                    placeholder={"La conosci? Cerca per artista o titolo o entrambi"}
+                    placeholder={"La conosci? Cerca per artista/titolo"}
                     options={selectedOption}
                     blurInputOnSelect={true}
                     menuPortalTarget={document.body}

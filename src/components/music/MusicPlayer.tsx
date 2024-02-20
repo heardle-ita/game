@@ -65,8 +65,10 @@ function MusicPlayer({ songConfig }: MusicPlayerProps) {
         let iframeElement = document.getElementById('soundcloud-iframe');
 
         SC_WIDGET = window.SC.Widget(iframeElement);
-
+        
+        SC_WIDGET.unbind(window.SC.Widget.Events.PLAY_PROGRESS);
         SC_WIDGET.unbind(window.SC.Widget.Events.READY);
+        SC_WIDGET.unbind(window.SC.Widget.Events.FINISH);
 
         SC_WIDGET.bind(window.SC.Widget.Events.FINISH, () => {
             setPlaying(false);
