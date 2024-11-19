@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
+import { deprecate } from 'util';
 
 /**
  * Component for advertisement!!
- * 
+ * @deprecated
  */
 
 const loadScript = (src:any) => {

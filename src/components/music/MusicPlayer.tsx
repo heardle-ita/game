@@ -173,7 +173,7 @@ function MusicPlayer({ songConfig }: MusicPlayerProps) {
                         </div>
                     )
             }
-            <div style={{ display: "none" }}>
+            <div style={{ position: "absolute", zIndex:"-1000", opacity: "0%" }}>
                 <iframe id="soundcloud-iframe" allow="autoplay" title="Heardle" src={SILENT_SONG}></iframe>
             </div>
             <div style={{ display: "none" }}>
