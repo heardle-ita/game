@@ -46,8 +46,6 @@ async function fetchSong(accessToken: string): Promise<any> {
 
   do {
 
-    console.log(artist)
-
     song = await fetch(
       `https://api.spotify.com/v1/search?q=artist:${artist}&type=track&market=IT&limit=40&offset=${offset * 40}`,
       {
@@ -60,7 +58,6 @@ async function fetchSong(accessToken: string): Promise<any> {
     .then(
       (response) => {
         let artistsSongs = response.tracks.items.filter((v: any) => (v.artists[0].name.toLowerCase() === artist) && (v.preview_url != null))
-        console.log(artistsSongs)
         if(artistsSongs.length != 0) {
           return artistsSongs[
             Math.floor(Math.random() * artistsSongs.length)
@@ -89,89 +86,84 @@ export const getDailySong = (
   accessToken: string,
   dayPath: string
 ): Promise<any> => {
-
   let day = dayPath.replaceAll("/", "");
 
-  let hardCodedSong: any;
-
-  if (SONG_DATABASE[day]) {
-    hardCodedSong = SONG_DATABASE[day];
-  }
-
   return new Promise<SongConfig>(async (resolve, reject) => {
+    try {
+      // Reference to the Firebase song data based on the dayPath
+      const songRef = ref(db, "songs/" + dayPath);
 
-    //const database = getDatabase();
+      // Listen to the value of the songRef in Firebase
+      onValue(
+        songRef,
+        async (snapshot) => {
+          const data = snapshot.val();
 
-    let selectedSong: any;
+          if (data) {
+            // If the song data exists in Firebase, resolve with the data
+            console.debug("Song found in Firebase:", data);
+            resolve(data);
+          } else {
+            // If no song data is found in Firebase, fetch a new song
+            console.debug("Song not found in Firebase, fetching new song...");
+            
+            // Fetch the song from the API
+            const selectedSong = await fetchSong(accessToken);
 
-    //do {
-      //do {
-        //selectedSong = await fetchSong(accessToken)
-        /* .then((song) => {
-          value = new RegExp(banWords.join("|")).test(song.name.toLowerCase());
-          value ? console.debug("rejected: " + value) : null;
-          return song;
-        });
-      } while(value); */
+            // Format and clean the song name
+            let songName = selectedSong.name.includes("-")
+              ? selectedSong.name.substring(0, selectedSong.name.indexOf("-"))
+              : selectedSong.name.includes("(")
+              ? selectedSong.name.substring(0, selectedSong.name.indexOf("("))
+              : selectedSong.name;
 
-    /* } while (
-      selectedSong.artists[0].name.toLowerCase() != artist
-    ); */
-    selectedSong = await fetchSong(accessToken)
+            // Combine artist name and song name
+            let trackName = selectedSong.artists[0].name + " " + selectedSong.name;
 
-    let song = selectedSong.name.includes("-")
-      ? selectedSong.name.substring(0, selectedSong.name.indexOf("-"))
-      : selectedSong.name.includes("(")
-      ? selectedSong.name.substring(0, selectedSong.name.indexOf("("))
-      : selectedSong.name;
+            // Clean up track name (removes special characters)
+            trackName = trackName.replaceAll("å", "a");
+            trackName = trackName.replaceAll("_", "");
+            trackName = trackName.replaceAll(".", "");
+            trackName = trackName.replaceAll("?", "");
+            trackName = trackName.replaceAll("!", "");
 
-    let trackname = selectedSong.artists[0].name + " " + selectedSong.name;
+            // Prepare the hardcoded song data to store in Firebase
+            const hardCodedSong = {
+              day: dayPath,
+              songLength: 30,
+              breaks: [1, 2, 4, 8, 16, 30],
+              trackName: trackName,
+              others: [selectedSong.artists[0].name + " " + songName],
+              song: songName,
+              artist: selectedSong.artists[0].name,
+              soundCloudLink: selectedSong.preview_url,
+              showSoundCloud: false,
+              showSpotify: true,
+              soundSpotifyLink:
+                "https://open.spotify.com/embed/track/" + selectedSong.id,
+              image: selectedSong.album.images[0].url,
+            };
 
-    trackname = trackname.replaceAll("å", "a");
-    trackname = trackname.replaceAll("_", "");
-    trackname = trackname.replaceAll(".", "");
-    trackname = trackname.replaceAll("?", "");
-    trackname = trackname.replaceAll("!", "");
+            // Store the song data in Firebase
+            await setSong(dayPath, hardCodedSong);
 
-    hardCodedSong = {
-      day: dayPath,
-      songLength: 30,
-      breaks: [1, 2, 4, 8, 16, 30],
-      trackName: trackname,
-      others: [selectedSong.artists[0].name + " " + song],
-      song:
-        selectedSong.name.indexOf("-") !== -1
-          ? selectedSong.name.substring(0, selectedSong.name.indexOf("-"))
-          : selectedSong.name,
-      artist: selectedSong.artists[0].name,
-      soundCloudLink: selectedSong.preview_url,
-      showSoundCloud: false,
-      showSpotify: true,
-      soundSpotifyLink:
-        "https://open.spotify.com/embed/track/" + selectedSong.id,
-      image: selectedSong.album.images[0].url,
-    };
-
-    const songRef = ref(db, "songs/" + dayPath);
-
-    onValue(
-      songRef,
-      (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          resolve(data);
-        } else {
-          setSong(dayPath, hardCodedSong);
-          resolve(hardCodedSong);
+            // Resolve the promise with the newly fetched song data
+            console.debug("Fetched and stored new song in Firebase:", hardCodedSong);
+            resolve(hardCodedSong);
+          }
+        },
+        (err) => {
+          console.error("Error accessing Firebase:", err);
+          reject(err); // Reject the promise if Firebase fails
+        },
+        {
+          onlyOnce: true, // Only listen once to avoid unnecessary updates
         }
-      },
-      (err) => {
-        console.error(err);
-        resolve(hardCodedSong);
-      },
-      {
-        onlyOnce: true,
-      }
-    );
+      );
+    } catch (error) {
+      console.error("Error fetching song:", error);
+      reject(error); // Reject the promise in case of any error
+    }
   });
 };
+

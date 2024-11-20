@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import CheckDate from './CheckDate';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 if (process.env.NODE_ENV !== 'development') {
@@ -13,7 +13,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <CheckDate />
   </React.StrictMode>,
   document.getElementById('root')
 );

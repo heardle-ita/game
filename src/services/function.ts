@@ -159,4 +159,88 @@ const buildScore = (guessList: any[]): number => {
     return max;
 }
 
-export { merge, checkAnswer, getDayStr, getDayStrAsPath, getDayFormattedText, similarity, buildScore }
+const checkIfSystemDateIsLessOrGreatenDataGame = (): boolean => {
+
+    const savedDate = localStorage.getItem("serverDate");
+    const now = getDayStrAsPath();
+
+    if(savedDate) {
+        // data sistema piu' piccola
+        // indietro nel tempo
+        if(savedDate > now)
+            return true;
+
+        // data sistema piu' grande
+        if(savedDate < now)
+            localStorage.removeItem("serverDate");
+
+        return false;
+    }
+
+    return false;
+    
+    
+}
+
+const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout: number = 2000): Promise<Response> => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+  
+    // Set timeout to abort the fetch if it takes too long
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+    try {
+      const response = await fetch(url, { ...options, signal });
+      clearTimeout(timeoutId); // Clear the timeout once the fetch is completed
+      return response;
+    } catch (error: any) {
+      if (error.name === "AbortError") {
+        throw new Error(`Request timed out after ${timeout}ms`);
+      }
+      throw error;
+    }
+  };
+
+
+// Helper function to fetch the date
+const fetchServerDate = async (retries = 10, delay = 1000): Promise<string> => {
+    const savedDate = localStorage.getItem("serverDate");
+    const now = getDayStrAsPath();
+
+    if (savedDate && savedDate === now) {
+      console.debug("Using stored date: " + savedDate);
+      return savedDate;
+    }
+  
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const response = await fetchWithTimeout("https://timeapi.io/api/time/current/zone?timeZone=Europe%2FRome");
+        if (response.ok) {
+          const data = await response.json();
+          const day = data.dateTime.replaceAll("-", "/").substring(0, 10);
+          localStorage.setItem("serverDate", day);
+          console.debug("Fetched server date: " + day);
+          return day;
+        } else {
+          throw new Error(`Failed to fetch server date (Status: ${response.status})`);
+        }
+      } catch (error) {
+        console.error(`Error fetching server date (Attempt ${attempt}/${retries}):`, error);
+  
+        if (attempt < retries) {
+          // Attendi prima di riprovare
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          console.debug("Retrying...");
+        } else {
+          // Dopo il massimo dei tentativi, refresh della pagina
+          console.error("Max retries reached. Reloading page...");
+        }
+      }
+    }
+  
+    // In caso di errore in tutte le iterazioni (non dovrebbe mai arrivarci)
+    throw new Error("Unexpected error in fetchServerDate.");
+  };
+  
+
+export { merge, checkAnswer, getDayStr, getDayStrAsPath, getDayFormattedText, similarity, buildScore, checkIfSystemDateIsLessOrGreatenDataGame, fetchServerDate }

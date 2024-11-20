@@ -91,7 +91,6 @@ function Table() {
     console.debug("USERS RT:")
     console.debug(usersTemp)
 
-
     console.debug("CLASSIFICA: ")
     let names = [];
     for(let i = 0; i < bests.length; i++) {
@@ -145,7 +144,7 @@ function Table() {
             </thead>
             <tbody>
            
-            <ScrollingTableRow />
+            {userTemp.length != 0 ? <ScrollingTableRow /> : <></>}
    
               <tr key="none">
                 <td></td>

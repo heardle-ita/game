@@ -227,3 +227,28 @@ body {
 .versions > span#coming-soon{
   background-color: #DB4437;
 }
+
+.date-check-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centra verticalmente */
+  align-items: center; /* Centra orizzontalmente */
+  min-height: 100vh; /* Assicura che il contenuto occupi tutta l'altezza della finestra */
+  font-family: monospace, Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+
+.date-check-container h2 {
+  color: #333;
+}
+
+.date-check-container pre {
+  font-size: 6px;
+  margin-top: 10px;
+}
+
+.date-check-container p {
+  font-size: 18px;
+  margin-top: 10px;
+}

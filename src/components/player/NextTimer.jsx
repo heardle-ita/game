@@ -12,14 +12,14 @@ function NextTimer() {
       while (isMounted && responseDay === null) {
         try {
           responseDay = await fetch(
-            "https://worldtimeapi.org/api/timezone/Europe/Rome"
+            "https://timeapi.io/api/time/current/zone?timeZone=Europe%2FRome"
           );
         } catch (error) {
           console.error("Errore CORS:", error);
         }
-        if (responseDay !== null && responseDay.ok) {
+        if (responseDay.ok) {
           const dataResponse = await responseDay.json();
-          const day = dataResponse.datetime;
+          const day = dataResponse.dateTime;
           setServerDate(day);
         } else {
           await new Promise((resolve) => setTimeout(resolve, 1200));
@@ -83,7 +83,7 @@ function NextTimer() {
     return function cleanup() {
       clearInterval(interval);
     };
-  });
+  }, [serverDate]);
 
   return (
     <>
