@@ -1,7 +1,10 @@
 
+import axios from 'axios';
+import * as cheerio from 'cheerio';
 import { STRING_COMPARE_LOCALE } from '../components/utils/constants';
 import { SongOption } from '../types/interfaces/options';
 import { SongConfig } from '../types/interfaces/song';
+
 
 const merge = (a: SongOption[], b: SongOption[], predicate = (a: SongOption, b: SongOption) => a.value === b.value) => {
     const c = [...a]; // copy to avoid side effects
@@ -242,5 +245,39 @@ const fetchServerDate = async (retries = 10, delay = 1000): Promise<string> => {
     throw new Error("Unexpected error in fetchServerDate.");
   };
   
+// TEMP
+// TODO: problema di CORS! 
+// fare server dedicato (probabile)
+    const getAudioPreview = async (id: string): Promise<string | null> => {
+        try {
+            // Effettua la richiesta a Spotify attraverso il proxy
+            const response = await axios({
+                method:'get',
+                url:`https://open.spotify.com/embed/track/${id}`,
+                withCredentials: false
+            });
+            const html = response.data;
+    
+            // Carica il DOM nella libreria cheerio
+            const $ = cheerio.load(html);
+    
+            // Cerca il campo audioPreview
+            const scriptTags = $('script');
+    
+            for (let i = 0; i < scriptTags.length; i++) {
+                const scriptContent = $(scriptTags[i]).html();
+                if (scriptContent) {
+                    let sonContent = JSON.parse(scriptContent)
+                    return sonContent.props.pageProps.state.data.entity.audioPreview.url
+                }
+            }
+    
+            return null; // Campo audioPreview non trovato
+        } catch (error) {
+            console.error('Errore durante il crawling:', error);
+            return null;
+        }
+    };
+    
 
-export { merge, checkAnswer, getDayStr, getDayStrAsPath, getDayFormattedText, similarity, buildScore, checkIfSystemDateIsLessOrGreatenDataGame, fetchServerDate }
+export { merge, checkAnswer, getDayStr, getDayStrAsPath, getDayFormattedText, similarity, buildScore, checkIfSystemDateIsLessOrGreatenDataGame, fetchServerDate, getAudioPreview }

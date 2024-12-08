@@ -1,4 +1,4 @@
-import { getDayStr, getDayStrAsPath } from "./function";
+import { getDayStr, getDayStrAsPath, getAudioPreview } from "./function";
 import { SongConfig } from "../types/interfaces/song";
 import { artists } from "../components/utils/artists";
 import { getDatabase, ref, onValue, set } from "firebase/database";
@@ -11,16 +11,18 @@ interface Map {
 }
 
 const DEFAULT_SONG = {
-  day: "",
-  songLength: 30,
-  breaks: [1, 2, 4, 8, 16, 30],
-  trackName: "Elisa Litoranea-",
-  others: ["Elisa Litoranea (con Matilda De Angelis)"],
-  song: "Litoranea",
-  artist: "Elisa",
-  soundCloudLink: "https://soundcloud.com/elisa-official/litoranea-1",
-  showSoundCloud: true,
-  image: "https://i1.sndcdn.com/artworks-dr78ZwUE9K3r-0-t500x500.jpg",
+  artists:[{name:"Pinguini Tattici Nucleari"}],
+  breaks: [1,2,4,8,16,30],
+  day:"2024/03/31",
+  album: {images: [{url:"https://i.scdn.co/image/ab67616d0000b273df8e97d294e5f3d8ec777f68"}]},
+  others: ["Pinguini Tattici Nucleari Fede"],
+  showSoundCloud:false,
+  showSpotify:true,
+  name:"Fede",
+  songLength:30,
+  preview_url:"https://p.scdn.co/mp3-preview/39ab1a30f963ea53f7d6158cd7e137ce3c1796db?cid=cfafff534b09449592428997e78acf38",
+  soundSpotifyLink:"https://open.spotify.com/embed/track/2WYL6etkzaNnQUxvQ7KyYC",
+  trackName:"Pinguini Tattici Nucleari Fede"
 };
 
 const SONG_DATABASE: Map = {};
@@ -56,23 +58,32 @@ async function fetchSong(accessToken: string): Promise<any> {
     )
     .then((response) => response.json())
     .then(
-      (response) => {
-        let artistsSongs = response.tracks.items.filter((v: any) => (v.artists[0].name.toLowerCase() === artist) && (v.preview_url != null))
+      async (response) => {
+        let artistsSongs = response.tracks.items.filter((v: any) => (v.artists[0].name.toLowerCase() === artist))
         if(artistsSongs.length != 0) {
-          return artistsSongs[
-            Math.floor(Math.random() * artistsSongs.length)
-          ]
-        }
+          const selectedSong =
+          artistsSongs[Math.floor(Math.random() * artistsSongs.length)];
+
+          // Recupera l'URL di audioPreview usando la funzione getAudioPreview
+          const audioPreview = await getAudioPreview(
+            selectedSong.id
+          );
+
+          // Aggiungi l'audioPreview alla traccia
+          selectedSong.preview_url = audioPreview || null;
+
+          return selectedSong;
+        }       
       }
     )
     .catch((error) => {
       // reset search
       artist = artists[Math.floor(Math.random() * artists.length)]
       offset = 0
-      return undefined
+      return undefined;
     });
 
-    if(song && !(new RegExp(banWords.join("|")).test(song.name.toLowerCase()))) 
+    if(song && !(new RegExp(banWords.join("|")).test(song.name.toLowerCase())) && song.preview_url !== null) 
       finded = true;
     
     offset++;
@@ -86,7 +97,6 @@ export const getDailySong = (
   accessToken: string,
   dayPath: string
 ): Promise<any> => {
-  let day = dayPath.replaceAll("/", "");
 
   return new Promise<SongConfig>(async (resolve, reject) => {
     try {
@@ -144,6 +154,7 @@ export const getDailySong = (
               image: selectedSong.album.images[0].url,
             };
 
+            console.log(hardCodedSong)
             // Store the song data in Firebase
             await setSong(dayPath, hardCodedSong);
 
