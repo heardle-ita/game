@@ -253,7 +253,7 @@ const fetchServerDate = async (retries = 10, delay = 1000): Promise<string> => {
             // Effettua la richiesta a Spotify attraverso il proxy
             const response = await axios({
                 method:'get',
-                url:`https://open.spotify.com/embed/track/${id}`,
+                url:`https://serverspotify.onrender.com/proxy/spotify/embed/track/${id}`,
                 withCredentials: false
             });
             const html = response.data;
