@@ -40,17 +40,19 @@ function HowToPlay() {
     toString = toString.replaceAll("0","o");
     toString = toString.replaceAll("4","a");
     toString = toString.replaceAll("3","e");
+    toString = toString.replaceAll(/\s/g, "")
     return toString;
   }
 
   const onChanged = (event) => {
 
     let name = event.target.value;
-
+    console.debug(name);
     const regex = /^(?!\s*$)[a-zA-Z0-9\s!?\-_$@&]{0,24}$/;
+
     if (regex.test(name) || name === "") {
       setUsername(name);
-    }
+    } else return;
 
     let nameString = convertToString(name);
     if (nameString.length >= 3) {
@@ -59,6 +61,7 @@ function HowToPlay() {
           nameString.toLowerCase().includes(cuss[key]) ||
           cuss[key].includes(nameString.toLowerCase())
         ) {
+          console.debug(cuss[key]);
           setIsValid(false);
           return;
         }
