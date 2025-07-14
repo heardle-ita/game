@@ -4,7 +4,7 @@ import * as cheerio from 'cheerio';
 import { STRING_COMPARE_LOCALE } from '../components/utils/constants';
 import { SongOption } from '../types/interfaces/options';
 import { SongConfig } from '../types/interfaces/song';
-import { getTimestampServer } from './firebaseRealtime';
+import { getTimestampServer, updateTimestampServer } from './firebaseRealtime';
 
 
 const merge = (a: SongOption[], b: SongOption[], predicate = (a: SongOption, b: SongOption) => a.value === b.value) => {
@@ -238,27 +238,29 @@ const fetchServerDate = async (retries = 10, delay = 1000): Promise<string> => {
   
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-          // Recupera timestamp dal server Firebase
-          const ts = await getTimestampServer();
-      
-          // Format `YYYY/MM/DD`
-          const data = formatTimestampAsPath(ts);
-      
-          localStorage.setItem("serverDate", data);
-          console.debug("Fetched server date from Firebase: " + data);
-          return data;
-      
+            await updateTimestampServer();
+
+            // Recupera timestamp dal server Firebase
+            const ts = await getTimestampServer();
+        
+            // Format `YYYY/MM/DD`
+            const data = formatTimestampAsPath(ts);
+        
+            localStorage.setItem("serverDate", data);
+            console.debug("Fetched server date from Firebase: " + data);
+            return data;
+        
         } catch (error) {
-          console.error(`Error fetching server date from Firebase (Attempt ${attempt}/${retries}):`, error);
-      
-          if (attempt < retries) {
+            console.error(`Error fetching server date from Firebase (Attempt ${attempt}/${retries}):`, error);
+        
+            if (attempt < retries) {
             await new Promise((resolve) => setTimeout(resolve, delay));
             console.debug("Retrying...");
-          } else {
+            } else {
             console.error("Max retries reached. Reloading page...");
-          }
+            }
         }
-      }
+    }
         
     // In caso di errore in tutte le iterazioni (non dovrebbe mai arrivarci)
     throw new Error("Unexpected error in fetchServerDate.");
