@@ -1,4 +1,4 @@
-import { getDatabase, ref, set, get, update, remove } from "firebase/database";
+import { ref, set, get, update, serverTimestamp } from "firebase/database";
 import { uid } from "uid";
 import { db } from "./firebase";
 
@@ -31,10 +31,28 @@ async function updateUserByUid(uid: any, score: any) {
   });
 }
 
+async function getTimestampServer(): Promise<number> {
+  const myRef = ref(db, "tmp");
+
+  // Scrive il timestamp sul server
+  await update(myRef, {
+    lastUpdated: serverTimestamp(),
+  });
+
+  // Legge il valore aggiornato
+  const snapshot = await get(myRef);
+  const data = snapshot.val();
+
+  // Restituisce il timestamp numerico
+  return data.lastUpdated;
+}
+
+
 export {
   getDB,
   setUser,
   getUsers,
   getUserByUid,
-  updateUserByUid
+  updateUserByUid,
+  getTimestampServer
 };

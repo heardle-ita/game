@@ -1,10 +1,9 @@
-import { getDayStr, getDayStrAsPath, getAudioPreview } from "./function";
+import { getAudioPreview } from "./function";
 import { SongConfig } from "../types/interfaces/song";
 import { artists } from "../components/utils/artists";
-import { getDatabase, ref, onValue, set } from "firebase/database";
+import { ref, onValue, set } from "firebase/database";
 import { db } from "./firebase";
 import { banWords } from "../components/utils/constants";
-import { of } from "rxjs";
 
 interface Map {
   [key: string]: any;
