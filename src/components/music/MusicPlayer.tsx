@@ -64,81 +64,85 @@ function MusicPlayer({ songConfig }: MusicPlayerProps) {
     useEffect(() => {
         let iframeElement = document.getElementById('soundcloud-iframe');
 
-        SC_WIDGET = window.SC.Widget(iframeElement);
-        
-        SC_WIDGET.unbind(window.SC.Widget.Events.PLAY_PROGRESS);
-        SC_WIDGET.unbind(window.SC.Widget.Events.READY);
-        SC_WIDGET.unbind(window.SC.Widget.Events.FINISH);
+        const initSC = () => {
+            if (!window.SC || !window.SC.Widget) {
+                setTimeout(initSC, 100);
+                return;
+            }
 
-        SC_WIDGET.bind(window.SC.Widget.Events.FINISH, () => {
-            setPlaying(false);
-        });
+            SC_WIDGET = window.SC.Widget(iframeElement);
 
-        if (finished) {
-            
-            console.debug("1 useEffect openedStep=", openedStep)
-            SC_WIDGET.bind(window.SC.Widget.Events.READY, () => {
-                SC_WIDGET.setVolume(0);
+            SC_WIDGET.unbind(window.SC.Widget.Events.PLAY_PROGRESS);
+            SC_WIDGET.unbind(window.SC.Widget.Events.READY);
+            SC_WIDGET.unbind(window.SC.Widget.Events.FINISH);
 
-                setSongFullDurationInMilis(ref.current!.getDuration()*1000)
- 
-                SC_WIDGET.bind(window.SC.Widget.Events.PLAY_PROGRESS, function () {
+            SC_WIDGET.bind(window.SC.Widget.Events.FINISH, () => {
+                setPlaying(false);
+            });
+
+            if (finished) {
+
+                console.debug("1 useEffect openedStep=", openedStep)
+                SC_WIDGET.bind(window.SC.Widget.Events.READY, () => {
                     SC_WIDGET.setVolume(0);
-                    SC_WIDGET.getPosition(function (currentPosition: number) {
-                        let _currentPositionInMilis = Math.floor((ref.current!.getCurrentTime()*1000));
-                        setCurrentPositionInMilis(_currentPositionInMilis);
 
-                        if (_currentPositionInMilis >= 28999) {
-                            SC_WIDGET.pause();
-                            SC_WIDGET.seekTo(0)
-                            ref.current!.seekTo(0,'seconds');
-                            
-                            setPlaying(false);
-                            console.debug("STOPPED !!!")
+                    setSongFullDurationInMilis(ref.current!.getDuration()*1000)
 
-                        }
-                    });
-                    
-
-                });
-                setMusicReady(true);
-            });
-        } else {
-            console.debug("2 useEffect openedStep=", openedStep)
-
-            SC_WIDGET.bind(window.SC.Widget.Events.READY, () => {
-
-                SC_WIDGET.setVolume(0);
-
-                setSongFullDurationInMilis(ref.current!.getDuration()*1000)
-
-                var stopTimeInMs = songConfig.breaks[openedStep] * 1000;
-
-
-                SC_WIDGET.bind(window.SC.Widget.Events.PLAY_PROGRESS, function () {
-                    SC_WIDGET.getPosition(function (currentPosition: number) {
+                    SC_WIDGET.bind(window.SC.Widget.Events.PLAY_PROGRESS, function () {
                         SC_WIDGET.setVolume(0);
-                        let _currentPositionInMilis = Math.floor((ref.current!.getCurrentTime()*1000));
-                        setCurrentPositionInMilis(_currentPositionInMilis);
-                        
-                        // if(isPlaying === true && finished === true){
-                        //     return;
-                        // }
-                        if (_currentPositionInMilis >= stopTimeInMs) {
-                            SC_WIDGET.pause();
-                            SC_WIDGET.seekTo(0)
-                            ref.current!.seekTo(0,'seconds');
+                        SC_WIDGET.getPosition(function (currentPosition: number) {
+                            let _currentPositionInMilis = Math.floor((ref.current!.getCurrentTime()*1000));
+                            setCurrentPositionInMilis(_currentPositionInMilis);
 
-                            setPlaying(false);
-                            console.debug("STOPPED !!!")
-                        }
+                            if (_currentPositionInMilis >= 28999) {
+                                SC_WIDGET.pause();
+                                SC_WIDGET.seekTo(0)
+                                ref.current!.seekTo(0,'seconds');
+
+                                setPlaying(false);
+                                console.debug("STOPPED !!!")
+                            }
+                        });
                     });
+                    setMusicReady(true);
                 });
+            } else {
+                console.debug("2 useEffect openedStep=", openedStep)
 
-                setMusicReady(true);
+                SC_WIDGET.bind(window.SC.Widget.Events.READY, () => {
 
-            });
-        }
+                    SC_WIDGET.setVolume(0);
+
+                    setSongFullDurationInMilis(ref.current!.getDuration()*1000)
+
+                    var stopTimeInMs = songConfig.breaks[openedStep] * 1000;
+
+                    SC_WIDGET.bind(window.SC.Widget.Events.PLAY_PROGRESS, function () {
+                        SC_WIDGET.getPosition(function (currentPosition: number) {
+                            SC_WIDGET.setVolume(0);
+                            let _currentPositionInMilis = Math.floor((ref.current!.getCurrentTime()*1000));
+                            setCurrentPositionInMilis(_currentPositionInMilis);
+
+                            // if(isPlaying === true && finished === true){
+                            //     return;
+                            // }
+                            if (_currentPositionInMilis >= stopTimeInMs) {
+                                SC_WIDGET.pause();
+                                SC_WIDGET.seekTo(0)
+                                ref.current!.seekTo(0,'seconds');
+
+                                setPlaying(false);
+                                console.debug("STOPPED !!!")
+                            }
+                        });
+                    });
+
+                    setMusicReady(true);
+
+                });
+            }
+        }; // end initSC
+        initSC();
     }, [openedStep, finished])
 
 
